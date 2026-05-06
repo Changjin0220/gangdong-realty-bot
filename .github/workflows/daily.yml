@@ -1,0 +1,23 @@
+yamlname: Daily Real Estate Alert
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 한국시간 오전 8시 (UTC 23:00)
+  workflow_dispatch:  # 수동 실행 버튼도 생김
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run alert script
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+        run: python main.py
