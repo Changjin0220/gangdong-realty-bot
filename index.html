@@ -6,27 +6,25 @@
 <title>강동구 부동산 알리미</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
-  header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 24px 20px; text-align: center; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+  header { background: #1a1a2e; color: white; padding: 24px 20px; text-align: center; }
   header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   header p { font-size: 13px; opacity: 0.7; }
   .updated { background: #fff; text-align: center; padding: 10px; font-size: 12px; color: #888; border-bottom: 1px solid #eee; }
   .top3-bar { display: flex; justify-content: center; gap: 12px; padding: 16px 20px; background: white; border-bottom: 1px solid #eee; flex-wrap: wrap; }
   .top3-chip { background: #f0f4ff; border: 1.5px solid #4361ee; border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: #4361ee; }
-  .top3-chip:first-child { background: #4361ee; color: white; }
+  .top3-chip.first { background: #4361ee; color: white; }
   .container { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
   .dong-section { margin-bottom: 28px; }
   .dong-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-  .dong-title span { background: #4361ee; color: white; border-radius: 8px; padding: 2px 10px; font-size: 13px; }
+  .dong-badge { background: #4361ee; color: white; border-radius: 8px; padding: 2px 10px; font-size: 13px; }
   .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
   .card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-  .card-icon { font-size: 18px; }
-  .card-title { font-size: 14px; font-weight: 700; color: #333; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 700; }
   .apt-item { border-bottom: 1px solid #f0f0f0; padding: 10px 0; }
   .apt-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .apt-name { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .apt-name-row { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; display: flex; justify-content: space-between; }
   .apt-count { font-size: 11px; color: #888; font-weight: 400; }
   .size-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
   .size-label { font-size: 11px; color: #666; background: #f5f5f5; padding: 2px 7px; border-radius: 4px; }
@@ -47,57 +45,75 @@
 </header>
 
 <div class="updated" id="updated">데이터 불러오는 중...</div>
-
 <div class="top3-bar" id="top3-bar"></div>
-
 <div class="container" id="container">
   <div class="loading">📊 데이터 불러오는 중...</div>
 </div>
 
-<script>
-async function loadData() {
-  try {
-    const res = await fetch('./data.json?t=' + Date.now());
-    if (!res.ok) throw new Error('데이터 없음');
-    const json = await res.json();
-    renderDashboard(json);
-  } catch (e) {
-    document.getElementById('container').innerHTML = '<div class="error">⚠️ 데이터를 불러올 수 없어요.<br>GitHub Actions가 한 번 이상 실행되면 나타납니다.</div>';
-  }
-}
-
+<script type="text/javascript">
 function formatPrice(won) {
-  if (won >= 10000) return `${(won/10000).toFixed(1)}억`;
-  return `${won.toLocaleString()}만`;
+  if (won >= 10000) return (won / 10000).toFixed(1) + '억';
+  return won.toLocaleString() + '만';
 }
 
 function renderDashboard(json) {
   document.getElementById('updated').textContent = '📅 마지막 업데이트: ' + json.updated_at;
 
-  const bar = document.getElementById('top3-bar');
-  bar.innerHTML = json.top3_dongs.map((d, i) =>
-    `<div class="top3-chip">${i === 0 ? '🏆 ' : ''}${d}</div>`
-  ).join('');
+  var bar = document.getElementById('top3-bar');
+  bar.innerHTML = '';
+  json.top3_dongs.forEach(function(d, i) {
+    var chip = document.createElement('div');
+    chip.className = 'top3-chip' + (i === 0 ? ' first' : '');
+    chip.textContent = (i === 0 ? '🏆 ' : '') + d;
+    bar.appendChild(chip);
+  });
 
-  const container = document.getElementById('container');
+  var container = document.getElementById('container');
   container.innerHTML = '';
 
-  json.data.forEach(dong => {
-    const section = document.createElement('div');
+  json.data.forEach(function(dong) {
+    var section = document.createElement('div');
     section.className = 'dong-section';
 
-    section.innerHTML = `
-      <div class="dong-title">
-        📍 ${dong.dong}
-        <span>총 ${dong.total_trades}건</span>
-      </div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-icon">🔥</span>
-            <span class="card-title">거래량 TOP 3</span>
-          </div>
-          ${dong.top3_count.map((apt, i) => `
-            <div class="apt-item">
-              <div class="apt-name">
-                <span><span class="rank ra
+    var countHTML = dong.top3_count.map(function(apt, i) {
+      var sizeRows = Object.keys(apt.stats).sort().map(function(size) {
+        var stat = apt.stats[size];
+        return '<div class="size-row"><span class="size-label">' + size + '</span><span class="price-range">' + formatPrice(stat.min) + ' ~ ' + formatPrice(stat.max) + '</span></div>';
+      }).join('');
+      return '<div class="apt-item"><div class="apt-name-row"><span><span class="rank rank-' + (i+1) + '">' + (i+1) + '</span>' + apt.name + '</span><span class="apt-count">' + apt.count + '건</span></div>' + sizeRows + '</div>';
+    }).join('');
+
+    var priceHTML = dong.top3_price.map(function(apt, i) {
+      var sizeRows = Object.keys(apt.stats).sort().map(function(size) {
+        var stat = apt.stats[size];
+        return '<div class="size-row"><span class="size-label">' + size + '</span><span class="price-range">' + formatPrice(stat.min) + ' ~ ' + formatPrice(stat.max) + '</span></div>';
+      }).join('');
+      return '<div class="apt-item"><div class="apt-name-row"><span><span class="rank rank-' + (i+1) + '">' + (i+1) + '</span>' + apt.name + '</span><span class="apt-count">최고 ' + formatPrice(apt.max_price) + '</span></div>' + sizeRows + '</div>';
+    }).join('');
+
+    section.innerHTML = '<div class="dong-title">📍 ' + dong.dong + '<span class="dong-badge">총 ' + dong.total_trades + '건</span></div><div class="cards"><div class="card"><div class="card-header">🔥 거래량 TOP 3</div>' + countHTML + '</div><div class="card"><div class="card-header">💰 최고가 TOP 3</div>' + priceHTML + '</div></div>';
+    container.appendChild(section);
+  });
+}
+
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'data.json?t=' + Date.now(), true);
+xhr.onload = function() {
+  if (xhr.status === 200) {
+    try {
+      var json = JSON.parse(xhr.responseText);
+      renderDashboard(json);
+    } catch(e) {
+      document.getElementById('container').innerHTML = '<div class="error">JSON 파싱 오류: ' + e.message + '</div>';
+    }
+  } else {
+    document.getElementById('container').innerHTML = '<div class="error">데이터 로드 실패: ' + xhr.status + '</div>';
+  }
+};
+xhr.onerror = function() {
+  document.getElementById('container').innerHTML = '<div class="error">네트워크 오류</div>';
+};
+xhr.send();
+</script>
+</body>
+</html>
