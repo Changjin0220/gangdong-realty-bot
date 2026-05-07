@@ -1,4 +1,4 @@
-yamlname: Daily Real Estate Alert
+name: Daily Real Estate Alert
 
 on:
   schedule:
