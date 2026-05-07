@@ -1,23 +1,9 @@
-name: Daily Real Estate Alert
+# 강동구 부동산 알리미 🏢
 
-on:
-  schedule:
-    - cron: '0 23 * * *'
-  workflow_dispatch:
+강동구 아파트 실거래가를 매일 오전 8시에 텔레그램으로 알려주는 자동화 봇입니다.
 
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: pip install requests
-      - name: Run alert script
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
-        run: python main.py
+## 기능
+- 국토부 실거래가 API 연동
+- 거래량 TOP3 동네 자동 선별
+- 아파트별 평수별 최저/최고가 분석
+- 매일 오전 8시 텔레그램 자동 발송
