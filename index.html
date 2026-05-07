@@ -57,7 +57,7 @@
 <script>
 async function loadData() {
   try {
-    const res = await fetch('data.json?t=' + Date.now());
+    const res = await fetch('./data.json?t=' + Date.now());
     if (!res.ok) throw new Error('데이터 없음');
     const json = await res.json();
     renderDashboard(json);
